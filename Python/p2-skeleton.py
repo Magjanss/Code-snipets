@@ -28,6 +28,8 @@
 # ((), ((), ()))
 # (((), ()), ())
 #
+## (((),()), ((),()))  <= More than 3 empty tuples, ergo wrong
+#
 # degree 4 (5 pairs):
 #
 # ((), ((), ((), ())))
@@ -53,9 +55,45 @@
 
 
 def nested_pairs(n):
+    dbg = 0
     """Yield all nested pairs with degree *n*."""
     # TODO: Replace the following line with your own code.
-    pass
+    if dbg: print("Starting to run a np generator. n={}\n".format(n))
+    if n > 2:
+        try:
+            np_right = nested_pairs(n-1) # create new generator
+            for nextvalue in np_right:
+                s = "((), {})".format(nextvalue) # use the new generator
+                if dbg: print("From np (n={}): {}\n".format(n,s))
+                yield s
+        except GeneratorExit:
+            print("Exiting right")
+            return
+        try:
+            np_left = nested_pairs(n-1) # create new generator
+            for nextvalue in np_left:
+                s = "({}, ())".format(nextvalue) # use the new generator
+                if dbg: print("From np (n={}): {}\n".format(n,s))
+                yield s
+        except GeneratorExit:
+            print("Exiting left")
+            return
+    if n == 2:
+        try:
+            s = "((), ())"
+            if dbg: print("From np (n={}) returning: {}\n".format(n,s))
+            yield s
+        except GeneratorExit:
+            if dbg: print("Exiting n==2")
+            return
+    if n == 1:
+        try:
+            s = "()"
+            #print("From np (n={}): {}\n".format(n, s))
+            yield s
+        except GeneratorExit:
+            print("Exiting n==1")
+            return
 
 
 # ## Problem 2
@@ -104,3 +142,12 @@ def count_nested_pairs(n):
 def count_nested_pairs_memoized(n):
     # TODO: Replace the following line with your own code.
     return 0
+
+if __name__ == "__main__":
+    n = 1
+    print("Nested pairs:")
+    while n<5:
+        print("*********************************************Trying order {}:\n".format(n))
+        for p in nested_pairs(n):
+            print("======================Recieving: {}".format(p))
+        n += 1
