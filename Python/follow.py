@@ -1,4 +1,5 @@
 # follow.py
+# from http://www.dabeaz.com/coroutines/
 #
 # A generator that follows a log file like Unix 'tail -f'.
 #
