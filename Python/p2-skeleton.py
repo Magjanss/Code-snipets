@@ -53,22 +53,22 @@
 
 
 def nested_pairs(n):
-    dbg = False
     """Yield all nested pairs with degree *n*."""
 
     # NoteToSelf:  View as a bTree with () as a leaf
     #
-    #               a full node is  *  (a node with two leafs) => ((), ())
-    #                              /\
-    #                            () ()
+    #         a full node is  *  (a node with two leafs) => ((), ())
+    #                        /\
+    #                       () ()
     #
-    #               a half nnode is  *  (a node with a node and a leaf) => (*, ())
-    #                               /\
-    #                              *  ()
+    #         a half nnode is  *  (a node with a node and a leaf) => (*, ())
+    #                         /\
+    #                        *  ()
     #
     # The order is the number of leafs
     # Order 1 is just a leaf
-    # To find all combinations we need to distribute theese nodes between each branch 
+    # To find all combinations we need to distribute theese nodes between
+    # each branch 
     #  
     # For order n > 2
     # Here we need to create all trees that fit into (*,*)
@@ -80,43 +80,20 @@ def nested_pairs(n):
     #                                     ((2,1),1)     => (((1,1), 1), 1)
     #
     # However, since both 1 and 2 has endpoints is is enough to find 1 or 2
-    if dbg: print("Starting to run a np generator. n={}\n".format(n))
     if n > 2:
-        for i in range(1,n):     # NoteToSelf: n not included in range 
-            #print("i = {}".format(i))
-            np_left = nested_pairs(i) # create new generator of lesser order
-            #if dbg: print("doing {} / {}".format(i, n-i))
+        for i in range(1,n):                 # Note: n not included in range 
+            np_left = nested_pairs(i)        # create new gen. of lesser order
             for nextvalue_left in np_left:
-                np_right = nested_pairs(n-i) # create new generator of lesser order
-                #if dbg: print("Left hand {}".format(nextvalue_left))
+                np_right = nested_pairs(n-i) # create new gen. of lesser order
                 for nextvalue_right in np_right:
-                    #if dbg: print("Right hand {}".format(nextvalue_right))
                     s = "({}, {})".format(nextvalue_left, nextvalue_right)
-                    #if dbg: print("TOTAL: {}\n".format(s))
-                    try:
-                        yield s
-                    except GeneratorExit:
-                        print("Exiting")
-                        return
-                #if dbg: print("No more right values...(left={}".format(nextvalue_left))
-            #if dbg: print("No more left values...")
-            
+                    yield s
     if n == 2:
-        try:
-            s = "((), ())"
-            if dbg: print("From np (n={}) returning: {}\n".format(n,s))
-            yield s
-        except GeneratorExit:
-            if dbg: print("Exiting n==2")
-            return
+        s = "((), ())"
+        yield s
     if n == 1:
-        try:
-            s = "()" 
-            if dbg: print("From np (n={}): {}\n".format(n, s))
-            yield s
-        except GeneratorExit:
-            print("Exiting n==1")
-            return
+        s = "()" 
+        yield s
 
 
 # ## Problem 2
@@ -168,13 +145,13 @@ def count_nested_pairs_memoized(n):
 
 if __name__ == "__main__":
     n = 1
-    order = 4
+    order = 6
     print("Nested pairs:")
     for n in range(1, order+1):
-        print("*********************************************Trying order {}:\n".format(n))
+        print("*****************************Trying order {}:".format(n))
         l = list()  
         for p in nested_pairs(n):
             if p in l: print("Duplicate!!")
             l.append(p)
-            print("Recieving from generator: {}".format(p))
+            print("Recieved: {}".format(p))
         print("Generated lines: {}".format(len(l)))
