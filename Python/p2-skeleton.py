@@ -78,6 +78,8 @@ def nested_pairs(n):
         except GeneratorExit:
             print("Exiting left")
             return
+        
+
     if n == 2:
         try:
             s = "((), ())"
