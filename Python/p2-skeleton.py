@@ -55,31 +55,45 @@
 
 
 def nested_pairs(n):
-    dbg = 0
+    dbg = False
     """Yield all nested pairs with degree *n*."""
-    # TODO: Replace the following line with your own code.
+
+    # NoteToSelf:  View as a bTree with () as a leaf
+    #
+    #               a full node is  *  (a node with two leafs) => ((), ())
+    #                              /\
+    #                            () ()
+    #
+    #               a half nnode is  *  (a node with a node and a leaf) => (*, ())
+    #                               /\
+    #                              *  ()
+    #
+    # The order is the number of leafs
+    # Order 1 is just a leaf
+    # To find all combinations we need to distribute theese nodes between each branch 
+    #  
     if dbg: print("Starting to run a np generator. n={}\n".format(n))
     if n > 2:
-        try:
-            np_right = nested_pairs(n-1) # create new generator
-            for nextvalue in np_right:
-                s = "((), {})".format(nextvalue) # use the new generator
-                if dbg: print("From np (n={}): {}\n".format(n,s))
-                yield s
-        except GeneratorExit:
-            print("Exiting right")
-            return
-        try:
-            np_left = nested_pairs(n-1) # create new generator
-            for nextvalue in np_left:
-                s = "({}, ())".format(nextvalue) # use the new generator
-                if dbg: print("From np (n={}): {}\n".format(n,s))
-                yield s
-        except GeneratorExit:
-            print("Exiting left")
-            return
-        
-
+      
+        for i in range(1,n):     # NoteToSelf: n not included in range 
+            #print("i = {}".format(i))
+            np_left = nested_pairs(i) # create new generator
+            np_right = nested_pairs(n-i) # create new generator
+            print("doing {} / {}".format(i, n-i))
+            for nextvalue_left in np_left:
+                if dbg: print("Left hand {}".format(nextvalue_left))
+                for nextvalue_right in np_right:
+                    if dbg: print("Right hand {}".format(nextvalue_right))
+                    s = "({}, {})".format(nextvalue_left, nextvalue_right)
+                    if dbg: print("TOTAL: {}\n".format(s))
+                    try:
+                        yield s
+                    except GeneratorExit:
+                        print("Exiting")
+                        return
+                if dbg: print("No more right values...(left={}".format(nextvalue_left))
+            if dbg: print("No more left values...")
+            
     if n == 2:
         try:
             s = "((), ())"
@@ -90,8 +104,8 @@ def nested_pairs(n):
             return
     if n == 1:
         try:
-            s = "()"
-            #print("From np (n={}): {}\n".format(n, s))
+            s = "()" 
+            print("From np (n={}): {}\n".format(n, s))
             yield s
         except GeneratorExit:
             print("Exiting n==1")
