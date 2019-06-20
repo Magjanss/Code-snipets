@@ -42,6 +42,8 @@
 # 1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, 208012, 742900,
 # 2674440, 9694845, 35357670, 129644790, 477638700, 1767263190, ...
 
+# Order 21: 6564120420 Calculated in 659.008 seconds.
+
 # ## Problem 1
 #
 # Implement a function nested_pairs() that yields all nested pairs
@@ -50,10 +52,6 @@
 # listed above. Use recursion. Test your function by counting the
 # number of nested pairs yielded by it and comparing against the
 # sequence of numbers given above.
-
-
-def nested_pairs(n):
-    """Yield all nested pairs with degree *n*."""
 
     # NoteToSelf:  View as a bTree with () as a leaf
     #
@@ -80,6 +78,10 @@ def nested_pairs(n):
     #                                     ((2,1),1)     => (((1,1), 1), 1)
     #
     # However, since both 1 and 2 has endpoints is is enough to find 1 or 2
+
+def nested_pairs(n):
+    """Yield all nested pairs with degree *n*."""
+
     if n > 2:
         for i in range(1,n):                 # Note: n not included in range 
             np_left = nested_pairs(i)        # create new gen. of lesser order
@@ -109,11 +111,18 @@ def nested_pairs(n):
 # degree for which you can compute the number of nested pairs in under
 # one minute?
 
+# NOTE the n == 2, 3 cuts some of the leafs and get more performance
 
 def count_nested_pairs(n):
     """Count the number of nested pairs with degree *n*."""
-    # TODO: Replace the following line with your own code.
-    return 0
+    if n == 1: return 1
+    #if n == 2: return 1  # extra speed => get order 18 in 24 seconds
+    #if n == 3: return 2  # more speed => get order 19 in 33 seconds
+    if n > 1:
+        c = 0
+        for i in range(1,n):
+            c = c + count_nested_pairs(i) * count_nested_pairs(n-i)       
+        return c
 
 
 # ## Problem 3
@@ -138,20 +147,45 @@ def count_nested_pairs(n):
 # compute the number of nested pairs for the maximal degree that you
 # could do in under one minute in Problem 2?
 
+# NOTE Hm, I got this idea in task2 so....
+
 
 def count_nested_pairs_memoized(n):
     # TODO: Replace the following line with your own code.
     return 0
 
 if __name__ == "__main__":
-    n = 1
-    order = 6
-    print("Nested pairs:")
-    for n in range(1, order+1):
-        print("*****************************Trying order {}:".format(n))
-        l = list()  
-        for p in nested_pairs(n):
-            if p in l: print("Duplicate!!")
-            l.append(p)
-            print("Recieved: {}".format(p))
-        print("Generated lines: {}".format(len(l)))
+    import time
+    tests = [ 2]
+
+    if 1 in tests:
+        print("*** Test part 1 ***")
+        print("Nested pairs:")
+        order = 12
+        for n in range(1, order+1):
+            print("Trying order {}:".format(n))
+            t0 = time.time()
+            l = list()  
+            for p in nested_pairs(n):
+                if p in l: print("Duplicate!!")  #remove to increase performance
+                l.append(p)
+                if n<6 : print("Recieved: {}".format(p))  #remove to increase performance
+            t1 = time.time()
+            total = t1 - t0
+            if n >= 6 : print("Suppressed output... (to many lines)")
+            print("Generated lines: {} in {:6.3f} seconds.".format(len(l), total))
+    if 2 in tests:
+        print("*** Test part 2 ***")
+        print("Count Nested pairs:")
+        order = 18
+        for n in range(10, order+1):
+            print("Trying order {}:".format(n))
+            t0 = time.time()
+            p = count_nested_pairs(n)           
+            print("Counted: {}".format(p))  #remove to increase performance
+            t1 = time.time()
+            total = t1 - t0
+            print("Calculated answer in {:6.3f} seconds.".format(total))
+    if 3 in tests:
+        print("*** Test part 3 ***")
+        print("Count Nested pairs:")
