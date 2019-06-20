@@ -74,26 +74,16 @@
     #                                     (1,1),(1,1)), => the same
     #                                     ((1,2),1),    => ((1, (1, 1)), 1)
     #                                     ((2,1),1)     => (((1,1), 1), 1)
-    #
-    # However, since both 1 and 2 has endpoints is is enough to find 1 or 2
 
 def nested_pairs(n):
     """Yield all nested pairs with degree *n*."""
 
-    if n > 2:
-        for i in range(1,n):                 # Note: n not included in range 
-            np_left = nested_pairs(i)        # create new gen. of lesser order
-            for nextvalue_left in np_left:
-                np_right = nested_pairs(n-i) # create new gen. of lesser order
-                for nextvalue_right in np_right:
-                    s = "({}, {})".format(nextvalue_left, nextvalue_right)
-                    yield s
-    if n == 2:
-        s = "((), ())"
-        yield s
-    if n == 1:
-        s = "()" 
-        yield s
+    if n == 1: yield "()" 
+    if n > 1:
+        for i in range(1,n):                 
+            for nextvalue_left in nested_pairs(i): # new gen. of lesser order
+                for nextvalue_right in nested_pairs(n-i): # new gen. 
+                    yield "({}, {})".format(nextvalue_left, nextvalue_right)
 
 
 # ## Problem 2
@@ -161,30 +151,30 @@ def count_nested_pairs_memoized(n):
 if __name__ == "__main__":
     import time
     from pprint import pprint
-    tests = [ 3]
+    tests = [1, 2, 3]  #Choose tests to run
 
     if 1 in tests:
         print("*** Test part 1 ***\n")
         print("Nested pairs:")
         order = 12
         for n in range(1, order+1):
-            print("Trying order {}:".format(n))
+            print("Trying order {}: ".format(n), end='')
             t0 = time.time()
             l = list()  
             for p in nested_pairs(n):
                 if p in l: print("Duplicate!!")  #remove to increase performance
                 l.append(p)
-                if n<6 : print("Recieved: {}".format(p))  #remove to increase performance
+                if n<6 : print("\nRecieved: {}".format(p), end='') 
             t1 = time.time()
             total = t1 - t0
-            if n >= 6 : print("Suppressed output... (to many lines)")
-            print("Generated lines: {} in {:6.3f} seconds.".format(len(l), total))
+            #if n >= 6 : print("Suppressed output... (to many lines)")
+            print(" Generated {} lines in {:6.3f} seconds.".format(len(l), total))
     if 2 in tests:
         print("\n*** Test part 2 ***\n")
         print("Count Nested pairs:")
         order = 18
         for n in range(10, order+1):
-            print("Trying order {}:".format(n))
+            print("Trying order {}:".format(n), end='')
             t0 = time.time()
             p = count_nested_pairs(n)           
             print("Counted: {}".format(p), end='') 
@@ -196,7 +186,7 @@ if __name__ == "__main__":
         print("Memoized Count of Nested pairs:")
         order = 30
         for n in range(18, order+1):
-            print("Trying order {}:".format(n))
+            print("Trying order {}: ".format(n), end='')
             t0 = time.time()
             p = count_nested_pairs_memoized(n)           
             print("Counted: {}".format(p), end='')  
