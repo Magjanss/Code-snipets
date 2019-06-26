@@ -56,7 +56,8 @@ def text2ints(text, m):
     """
     # TODO: Replace the next line with your own code
     print("text: {} block: {}".format(text, m))
-    print("text: {} block: {}".format(text.encode().from_bytes(byteorder='big'), m))
+    print("text: {} block: {}".format(text.encode(), m))
+    print("text: {} block: {}".format(int.from_bytes(text.encode(), byteorder='big'), m))
     return []
 
 
@@ -72,6 +73,11 @@ def ints2text(ints, m):
 
     """
     # TODO: Replace the next line with your own code
+    b=b''
+    for i in ints:
+        print(i.to_bytes(m, byteorder='big'))
+        b.join(i.to_bytes(m, byteorder='big'))
+        print(b)
     return ""
 
 
@@ -221,7 +227,8 @@ def decrypt(seckey, ciphertext):
 # will allow you to generate a key pair and encrypt messages.
 
 if __name__ == "__main__":
-    text2ints("hej", 2)
+    #text2ints("foo", 2)
+    ints2text([26223, 28416], 2)
     #p = int(input("Enter prime number p: "))
     #q = int(input("Enter prime number q: "))
     #print("Generating keypair")
