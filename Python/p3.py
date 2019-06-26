@@ -54,12 +54,16 @@ def text2ints(text, m):
         A list of integers.
 
     """
-    # TODO: Replace the next line with your own code
-    print("text: {} block: {}".format(text, m))
-    print("text: {} block: {}".format(text.encode(), m))
-    t = text.encode()
-    print("text: {} block: {}".format(int.from_bytes(text.encode(), byteorder='big', signed=), m))
-    return []
+    txt = text.encode()
+
+    # Fix padding:
+    tail = len(txt) % m
+    if tail != 0:
+        txt += b'\0'*(m - tail)
+    if debug:
+        print(txt)        
+    i = [int.from_bytes(txt[i:i+m], byteorder='big', signed=False) for i in range (0, len(txt), m)]
+    return i
 
 
 def ints2text(ints, m):
@@ -222,8 +226,19 @@ def decrypt(seckey, ciphertext):
 # will allow you to generate a key pair and encrypt messages.
 
 if __name__ == "__main__":
-    text2ints("foo", 2)
-    print(ints2text([26223, 28416], 2))
+    test = True
+    debug = True
+    if test:
+        print("Testing text/int conversion:")
+        text = 'foo'
+        chunk = 2
+        i = text2ints(text, chunk)
+        print("chunksize: {} Original text: '{}' ints: {} encoded=>decoded: '{}'".format(
+                chunk, text, i, ints2text(i, chunk)))
+        
+        print("Testing xgcd:")
+        
+
     #p = int(input("Enter prime number p: "))
     #q = int(input("Enter prime number q: "))
     #print("Generating keypair")
