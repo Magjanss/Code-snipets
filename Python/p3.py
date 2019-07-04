@@ -3,6 +3,7 @@
 # Skeleton Code
 
 import random
+#import math
 
 # In this assignment you are asked to implement a simple version of
 # the RSA cryptosystem.
@@ -61,7 +62,7 @@ def text2ints(text, m):
     if tail != 0:
         txt += b'\0'*(m - tail)
     if debug:
-        print(txt)        
+        print("Converting: {}".format(txt))        
     i = [int.from_bytes(txt[i:i+m], byteorder='big', signed=False) for i in range (0, len(txt), m)]
     return i
 
@@ -77,7 +78,10 @@ def ints2text(ints, m):
         A string.
 
     """
-    return b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
+    string = b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
+    if debug : print("Converted to string: {}".format(string))       
+    return string
+    #b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
 
 
 # ## Problem 2
@@ -111,8 +115,26 @@ def xgcd(a, b):
         Bezout coefficients for `a` and `b`.
 
     """
-    # TODO: Replace the following line with your own code.
-    return 0, 0, 0
+    # Here follows THE HORROR
+    # AKA the algorithm from wikipedia
+
+    r0, r1 = a, b
+    s0, s1 = 1, 0
+    t0, t1 = 0, 1
+    r2 =  1 # not 0
+    while r2 != 0 :
+        q  = r0 // r1
+        r2 = r0 - (q * r1)
+        s2 = s0 - (q * s1)
+        t2 = t0 - (q * t1)
+        r0 = r1
+        r1 = r2
+        s0 = s1 
+        s1 = s2
+        t0 = t1
+        t1 = t2
+
+    return r0, s0, t0
 
 
 def gcd(a, b):
@@ -127,8 +149,7 @@ def gcd(a, b):
         The greatest common divisor of the specified integers.
 
     """
-    # TODO: Replace the following line with your own code.
-    return 0
+    return a if b == 0 else gcd(b, a % b)
 
 
 # ## Problem 3
@@ -168,7 +189,17 @@ def generate_keypair(p, q):
 
     """
     # TODO: Replace the following line with your own code
-    return (0, 0), (0, 0)
+    n = p * q
+    if debug: print("p: {} q: {} => n: {}".format(p, q, n))
+    phi = (p - 1) * (q - 1)
+    if debug: print("phi: {}".format(phi))
+    e = random.randint(1,phi)
+    while (gcd(e, phi) != 1):
+        e = random.randint(1,phi)
+    if debug: print("e:  {}".format(e))
+    r,s,t = xgcd(e, phi)
+    d = s #???
+    return (e, n), (d, n)
 
 
 # ## Problem 4
@@ -204,7 +235,19 @@ def encrypt(pubkey, plaintext):
 
     """
     # TODO: Replace the following line with your own code
-    return []
+    e = pubkey[0]
+    #print(e)
+    n = pubkey[1]
+    #print(n)
+    b = 1 # math.log2(n+1)//8
+    #print(b)
+    numbers = text2ints(plaintext, b)
+    for i in numbers:
+        p = pow(i, e)
+        #print(p, p % n )
+    enc = [pow(i, e, n) for i in numbers]
+    #print(enc)
+    return enc
 
 
 def decrypt(seckey, ciphertext):
@@ -219,15 +262,22 @@ def decrypt(seckey, ciphertext):
 
     """
     # TODO: Replace the following line with your own code
-    return ""
+    print("#decrypt# seckey: {}".format(seckey))
+    d = seckey[0]
+    n = seckey[1]
+    b = 1 # math.log2(n+1)//8
+    dec = [pow(i, d, n) for i in ciphertext]
+    tx = ints2text(dec, b)
+    #print("This text was decrypted: {}".format(tx))
+    return tx
 
 
 # To test your implementation, you can use the following code, which
 # will allow you to generate a key pair and encrypt messages.
 
 if __name__ == "__main__":
-    test = True
-    debug = True
+    test = False
+    debug = False
     if test:
         print("Testing text/int conversion:")
         text = 'foo'
@@ -237,6 +287,7 @@ if __name__ == "__main__":
                 chunk, text, i, ints2text(i, chunk)))
         
         print("Testing xgcd:")
+        print("Expecting 2, -9, 47: {}".format(xgcd(240, 46)))
         
 
     #p = int(input("Enter prime number p: "))
@@ -256,3 +307,7 @@ if __name__ == "__main__":
 # using the secret key (91307, 268483).
 #
 # 259114 14038 13667 74062 148955 50062 36907 18603 93303 170481 7991
+
+    seckey = (91307, 268483)
+    encrypted_msg = [259114, 14038, 13667, 74062, 148955, 50062, 36907, 18603, 93303, 170481, 7991]
+    print("The decrypted message is: {}".format(decrypt(seckey, encrypted_msg)))
