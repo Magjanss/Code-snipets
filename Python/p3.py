@@ -229,15 +229,15 @@ def encrypt(pubkey, plaintext):
     """
     e = pubkey[0]
     n = pubkey[1]
-    b = 2
-    #b = int(log2(n+1)//8 )
+    #b = 2
+    b = int(log2(n+1)//8 )
     #print("b: {}".format(b))
-    #if b == 0 : b = 1 
-    print("Plaintext: {}".format(plaintext))
+    if b == 0 : b = 1 
+    #print("Plaintext: {}".format(plaintext))
     numbers = text2ints(plaintext, b)
-    print("numbers:   {}".format(numbers))
+    #print("numbers:   {}".format(numbers))
     enc = [pow(i, e, n) for i in numbers]
-    print("enc:   {}".format(enc))
+    #print("enc:   {}".format(enc))
     return enc
 
 
@@ -254,12 +254,12 @@ def decrypt(seckey, ciphertext):
     """
     d = seckey[0]
     n = seckey[1]
-    b = 2
-    #b = int(log2(n+1)//8 )
+    #b = 2
+    b = int(log2(n+1)//8 )
     #print("b: {}".format(b))
-    #if b == 0 : b = 1 
+    if b == 0 : b = 1 
     dec = [pow(i, d, n) for i in ciphertext]
-    print(dec)
+    #print(dec)
     return  ints2text(dec, b)
 
 
@@ -267,7 +267,7 @@ def decrypt(seckey, ciphertext):
 # will allow you to generate a key pair and encrypt messages.
 
 if __name__ == "__main__":
-    test = False
+    test = True
     debug = False
     if test:
         print("Testing text/int conversion:")
@@ -287,11 +287,12 @@ if __name__ == "__main__":
         print("encrypted_msg: {}".format(encrypted_msg))
         print("The decrypted message is: {}".format(decrypt(seckey, encrypted_msg)))
 
-    #p = int(input("Enter prime number p: "))
-    #q = int(input("Enter prime number q: "))
-    p = 11
-    q = 17
-    print("p = {}  q = {}".format(p, q))
+    p = int(input("Enter prime number p: "))
+    q = int(input("Enter prime number q: "))
+    #p = 11
+    #q = 131
+    #print("p = {}  q = {}".format(p, q))
+    # NOTE: Entering to small primes might make problems with some chars
 
     print("Generating keypair")
     pubkey, seckey = generate_keypair(p, q)
