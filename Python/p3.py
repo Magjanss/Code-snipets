@@ -3,7 +3,7 @@
 # Skeleton Code
 
 import random
-#import math
+from math import log2
 
 # In this assignment you are asked to implement a simple version of
 # the RSA cryptosystem.
@@ -56,15 +56,11 @@ def text2ints(text, m):
 
     """
     txt = text.encode()
-
     # Fix padding:
     tail = len(txt) % m
     if tail != 0:
         txt += b'\0'*(m - tail)
-    if debug:
-        print("Converting: {}".format(txt))        
-    i = [int.from_bytes(txt[i:i+m], byteorder='big', signed=False) for i in range (0, len(txt), m)]
-    return i
+    return  [int.from_bytes(txt[i:i+m], byteorder='big', signed=False) for i in range (0, len(txt), m)]
 
 
 def ints2text(ints, m):
@@ -78,10 +74,7 @@ def ints2text(ints, m):
         A string.
 
     """
-    string = b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
-    if debug : print("Converted to string: {}".format(string))       
-    return string
-    #b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
+    return b''.join([i.to_bytes(m, byteorder='big') for i in ints]).decode()
 
 
 # ## Problem 2
@@ -133,7 +126,6 @@ def xgcd(a, b):
         s1 = s2
         t0 = t1
         t1 = t2
-
     return r0, s0, t0
 
 
@@ -188,18 +180,19 @@ def generate_keypair(p, q):
         An RSA keypair.
 
     """
-    # TODO: Replace the following line with your own code
     n = p * q
-    if debug: print("p: {} q: {} => n: {}".format(p, q, n))
     phi = (p - 1) * (q - 1)
-    if debug: print("phi: {}".format(phi))
-    e = random.randint(1,phi)
-    while (gcd(e, phi) != 1):
-        e = random.randint(1,phi)
-    if debug: print("e:  {}".format(e))
-    r,s,t = xgcd(e, phi)
-    d = s #???
+    s = -1
+    while s < 0 : #Cant get this to work with negative keys
+        e = random.randint(1, phi)
+        while (gcd(e, phi) != 1):
+            e = random.randint(1,phi)
+        r, s, t = xgcd(e, phi)
+    d = s
     return (e, n), (d, n)
+
+
+  
 
 
 # ## Problem 4
@@ -234,19 +227,17 @@ def encrypt(pubkey, plaintext):
         A ciphertext message (a list of integers).
 
     """
-    # TODO: Replace the following line with your own code
     e = pubkey[0]
-    #print(e)
     n = pubkey[1]
-    #print(n)
-    b = 1 # math.log2(n+1)//8
-    #print(b)
+    b = 2
+    #b = int(log2(n+1)//8 )
+    #print("b: {}".format(b))
+    #if b == 0 : b = 1 
+    print("Plaintext: {}".format(plaintext))
     numbers = text2ints(plaintext, b)
-    for i in numbers:
-        p = pow(i, e)
-        #print(p, p % n )
+    print("numbers:   {}".format(numbers))
     enc = [pow(i, e, n) for i in numbers]
-    #print(enc)
+    print("enc:   {}".format(enc))
     return enc
 
 
@@ -261,15 +252,15 @@ def decrypt(seckey, ciphertext):
         A plaintext message (a string).
 
     """
-    # TODO: Replace the following line with your own code
-    print("#decrypt# seckey: {}".format(seckey))
     d = seckey[0]
     n = seckey[1]
-    b = 1 # math.log2(n+1)//8
+    b = 2
+    #b = int(log2(n+1)//8 )
+    #print("b: {}".format(b))
+    #if b == 0 : b = 1 
     dec = [pow(i, d, n) for i in ciphertext]
-    tx = ints2text(dec, b)
-    #print("This text was decrypted: {}".format(tx))
-    return tx
+    print(dec)
+    return  ints2text(dec, b)
 
 
 # To test your implementation, you can use the following code, which
@@ -280,34 +271,40 @@ if __name__ == "__main__":
     debug = False
     if test:
         print("Testing text/int conversion:")
-        text = 'foo'
-        chunk = 2
-        i = text2ints(text, chunk)
-        print("chunksize: {} Original text: '{}' ints: {} encoded=>decoded: '{}'".format(
-                chunk, text, i, ints2text(i, chunk)))
+        text = 'Testtext: åäö, check padding...'
+        for chunk in range(1,4):
+            i = text2ints(text, chunk)
+            print("chunksize: {} Original text: '{}' ints: {} encoded=>decoded: '{}'".format(
+                    chunk, text, i, ints2text(i, chunk)))
         
         print("Testing xgcd:")
         print("Expecting 2, -9, 47: {}".format(xgcd(240, 46)))
         
+        print("Further test:")
+        seckey = (91307, 268483)
+        print("seckey = {}".format(seckey))
+        encrypted_msg = [259114, 14038, 13667, 74062, 148955, 50062, 36907, 18603, 93303, 170481, 7991]
+        print("encrypted_msg: {}".format(encrypted_msg))
+        print("The decrypted message is: {}".format(decrypt(seckey, encrypted_msg)))
 
     #p = int(input("Enter prime number p: "))
     #q = int(input("Enter prime number q: "))
-    #print("Generating keypair")
-    #pubkey, seckey = generate_keypair(p, q)
-    #print("The public key is", pubkey, "and the private key is", seckey)
-    #message = input("Enter a message to encrypt with the public key: ")
-    #encrypted_msg = encrypt(pubkey, message)
-    #print("The encrypted message is: ", end="")
-    #print(" ".join(map(lambda x: str(x), encrypted_msg)))
-    #print("The decrypted message is: ", end="")
-    #print(decrypt(seckey, encrypted_msg))
+    p = 11
+    q = 17
+    print("p = {}  q = {}".format(p, q))
+
+    print("Generating keypair")
+    pubkey, seckey = generate_keypair(p, q)
+    print("The public key is", pubkey, "and the private key is", seckey)
+    message = input("Enter a message to encrypt with the public key: ")
+    encrypted_msg = encrypt(pubkey, message)
+    print("The encrypted message is: ", end="")
+    print(" ".join(map(lambda x: str(x), encrypted_msg)))
+    print("The decrypted message is: ", end="")
+    print(decrypt(seckey, encrypted_msg))
 
 # As a further test, we have generated a ciphertext for you. With a
 # working implementation, you should be able to decode that ciphertext
 # using the secret key (91307, 268483).
 #
 # 259114 14038 13667 74062 148955 50062 36907 18603 93303 170481 7991
-
-    seckey = (91307, 268483)
-    encrypted_msg = [259114, 14038, 13667, 74062, 148955, 50062, 36907, 18603, 93303, 170481, 7991]
-    print("The decrypted message is: {}".format(decrypt(seckey, encrypted_msg)))
