@@ -16,6 +16,6 @@ if __name__ == "__main__":
     while True:
         checkprime(i)
         i+=1
-        if i > 300000 : break
+        if i > 90000 : break
     print(primes)
 
