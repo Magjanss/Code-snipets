@@ -7,9 +7,9 @@ import mnist
 import png
 import random
 
-## Printimage helper function 
+## Some helper functions:
 def printimage(image):
-    """Prints an 28x28 image from a list of 784 values.
+    """Prints an 28x28 image to the console from a list of 784 values.
 
     Args:
         image: a list of 784 values
@@ -68,32 +68,22 @@ def cointoss():
 
 def make_images():
     """Generates PNG files from random digits in the training data."""
-
-    #def cointoss():
-    #    #Imagine a 100 sided coin...
-    #    if random.randint(0,100) == 1: return True
-    #    return False
-
-    getdigit = 0
-    imagenumber = 0
+    digitToGet = 0
+    imageNumber = 0
     for image, digit in mnist.read_training_data():
-        imagenumber += 1
-        if digit == getdigit :
+        imageNumber += 1
+        if digit == digitToGet :
             # HERE we add a random coin toss to get diffrent sets!
             if cointoss():
                 values = [255 - 255*i for i in image]
                 png.save_png(28, 28, values, 'digit-{}.png'.format(digit))
-                print("Image number: {}".format(getdigit))
-                printimage(image)
-                #for i in range(28):       #Print pretty to see image
-                #    slice = image[i*28 : (i+1)*28]
-                #    for item in slice:
-                #        print("{},".format(item), end="")
-                #    print("")
-                getdigit +=1
-        if getdigit == 10:
+                if DEBUG:
+                    print("Image number: {}".format(digitToGet))
+                    printimage(image)
+                digitToGet +=1
+        if digitToGet == 10:
             break
-    print("Scanned through {} images".format(imagenumber))
+    print("Scanned through {} images".format(imageNumber))
 
 # ## Problem 1
 #
@@ -143,8 +133,8 @@ def train(data):
     """
     pd = {d: 0 for d in range(10)}
     ## Hallucinate an extra black pixel => p: 1
-    pp = {d: {p: 1 for p in range(784)} for d in range(10)}
-    ppp = {}
+    ppt = {d: {p: 1 for p in range(784)} for d in range(10)}
+    pp = {}
     totalimages = 0
     # Read the image files from the data:
     for image, digit in data:
@@ -152,26 +142,21 @@ def train(data):
         #    if cointoss():
         #        print("Printing Random Digit: {}".format(digit))
         #        printimage(image)
-        totalimages +=1
+        totalimages += 1
         pd[digit] += 1 
         for pixel, value in enumerate(image):
-            pp[digit][pixel] += value
+            ppt[digit][pixel] += value
 
     # Calculate pd:
     for digit in range(10):
         pd[digit] = pd[digit] / totalimages  ## Check float
     
-    # Must be some simpler way to divide by total to get prob.   
-    for digit, d in pp.items():
+    # Must be some simpler way to divide by total to get prob. Oh well.
+    for digit, d in ppt.items():
         total = sum(d.values())
-        print("digit,  totalpixels (including hallucinated) : {} {}".format(digit,  total))
-        ppp[digit] = {k: v / total for k,v in d.items()} 
-        #print(ppp[digit])
-    print("pd: {}".format(pd))
-    print("total number of images: {}".format(totalimages))
-    #pp = ppp
-    print("pp[7][42]: {}".format(ppp[7][42]))
-    return pd, ppp
+        pp[digit] = {k: v / total for k,v in d.items()} 
+        
+    return pd, pp
 
 
 
@@ -202,33 +187,19 @@ def predict(model, image):
     Returns:
         The digit depicted by the image.
     """
-    # TODO: Replace the following line with your own code
-    print("testimage:")
-    printimage(image)
-    print(model[0].values())
-    s = sum(model[0].values())
-    print(s)
-    # Prior probabilities:
-    scores = [ math.log(model[0][i] ) for i in range(0,10)  ]
-    #print(model[0])
+    #printimage(image)
 
-    ### NOTE MIGHT BE GOOD TO ACCTUALLY USE THE IMAGE DATA (ARRRGGGH!!!)
+    # Prior probabilities (log):
+    scores = [ math.log(model[0][i] ) for i in range(0,10)  ]
+    
+    # Add log probabilities for each black pixel
     for pixelindex, pixel in enumerate(image) :
         if pixel == 1 : 
             for i in range(10) :  # len(scores)
-                #print(model[1][i][pixelindex])
-                #print(math.log(model[1][i][pixelindex]))
                 scores[i] += math.log(model[1][i][pixelindex])
 
-
-    print("scores: {} ".format(scores))
-            
-
-        #for pixel in model[1][digit]:
-        #    scores[digit] += math.log(model[1][digit][pixel])
-    #print(scores)
+    # Pick the digit with highest score
     r = scores.index(max(scores))
-    print(max(scores))
     return r
 
 
@@ -253,11 +224,17 @@ def evaluate(model, data):
     Returns:
         The accuracy of the classifier on the specified data.
     """
-    # TODO: Replace the following line with your own code
-    return 0
+    totalimages = 0
+    correct = 0
+    for image, digit in data:
+        totalimages += 1
+        if predict(model, image) == digit:
+            correct += 1
+    return correct / totalimages
 
 
 if __name__ == '__main__':
+    # Some extra test images
     img8 = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -286,7 +263,6 @@ if __name__ == '__main__':
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-            # WHAT!!! That is an 8 !!??
     img7 = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -372,21 +348,16 @@ if __name__ == '__main__':
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     
-    
-    #print("Generating image files ...")
-    #make_images()
+    DEBUG = True
+
+    print("Generating image files ...")
+    make_images()
     print("Estimating the probabilities ...")
     model = train(mnist.read_training_data())
     
     #model = train(mnist.read_test_data())
     
     print("Evaluating the classifier ...")
-    for i in range(0,10):
-        #This should print 1 (total probability)
-        print(sum(model[1][i].values()) )
-    print(predict(model, img1))
-    print(predict(model, img7))
-    print(predict(model, img8))
-    print(predict(model, img9))
+    #print("This '8' is predicted as: {} ".format(predict(model, img8)))
 
-    #print("Accuracy:", evaluate(model, mnist.read_test_data()))
+    print("Accuracy:", evaluate(model, mnist.read_test_data()))
