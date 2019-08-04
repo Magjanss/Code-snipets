@@ -48,7 +48,7 @@ def cyclic(graph):
         `True` iff the directed graph `graph` has a (directed) cycle.
     """
     def checkForCycles(currentNode, graph, visited):
-        visited.add(currentNode)
+        visited.append(currentNode)
         nextNodes = graph[currentNode]
         for node in nextNodes:
             if node in visited:
@@ -62,7 +62,7 @@ def cyclic(graph):
         visited.remove(currentNode)
         return False
 
-    visited = set()
+    visited = []
     # Brute force checking all nodes in the graph...
     for node in graph:
         if checkForCycles(node, graph, visited):
