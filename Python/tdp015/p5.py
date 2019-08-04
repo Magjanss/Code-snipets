@@ -4,7 +4,6 @@
 
 import sys
 import json
-import random
 
 # In one of my current research projects, I am developing algorithms
 # for the parsing of natural language to meaning representations in
@@ -34,13 +33,6 @@ import random
 # represented as a dictionary mapping vertices (or rather their ids)
 # to lists of neighbouring vertices.
 
-def cointoss():
-    """Cointoss with a probability of 1 in 100 to return true."""
-    #Imagine a 100 sided coin...
-    if random.randint(0,100) == 1: return True
-    return False
-
-
 def cyclic(graph):
     """Test whether the directed graph `graph` has a (directed) cycle.
 
@@ -56,35 +48,28 @@ def cyclic(graph):
         `True` iff the directed graph `graph` has a (directed) cycle.
     """
     def checkForCycles(currentNode, graph, visited):
-        if DEBUG: print("visited: {}".format(visited))
-        
         visited.add(currentNode)
-        if DEBUG: print("visited: {}".format(visited))
         nextNodes = graph[currentNode]
         for node in nextNodes:
             if node in visited:
-                #if DEBUG: print("Found a cycle")
                 return True
             if checkForCycles(node, graph, visited): #Deepth First Search
                 return True
         # If we reach this point then the branch did not have a cycle and edges leading here 
-        # Should not be marked as cyclic. Therefor we should remove the the node from visited 
-        # when backtracking.
+        # should not be marked as cyclic. Therefor we remove the the node from visited when
+        # backtracking.
         # Possibly we should have a "safe" list so that we dont have to dive down here again....
         visited.remove(currentNode)
         return False
 
     visited = set()
-
+    # Brute force checking all nodes in the graph...
     for node in graph:
         if checkForCycles(node, graph, visited):
             return True
     return False
 
-
-
 if __name__ == "__main__":
-    DEBUG = False
     # Open the file
     with open(sys.argv[1], 'r') as graphFile:
         graphs = json.load(graphFile)
@@ -94,28 +79,8 @@ if __name__ == "__main__":
     cg = 0
     for id, graph in graphs.items():
         total += 1
-        if id == "21623053": 
-            DEBUG = True
-        else: 
-            DEBUG = False
         if cyclic(graph):
-            if id == "21623053":
-                print("id: {} \n data: {}".format(id, graph))
             cg += 1
-            #print("id: {} \n data: {}".format(id, graph))
-            print("id: {} ".format(id))
-            
-      
+            print("{}".format(id))      
     print("{} cyclic graphs of a total of {}.".format(cg, total))
-   
-    # Find startnodes
-    #nonStartNodes = set()
-    #for currentNode, nextNodes in graph.items():
-    #    for node in nextNodes:
-    #        nonStartNodes.add(node)
-    #print("nonStartNodes: {}".format(nonStartNodes))
-    #startNodes = set([str(x) for x in range(len(graph))]) - nonStartNodes
-    #print("StartNodes: {}".format(startNodes))
-
-    #Interate through the startnodes looking for cycles
   
