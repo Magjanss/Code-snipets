@@ -1,0 +1,68 @@
+/* This is a comment*/
+body {
+    background-color: #DDEEFF; 
+}
+
+#wrap {
+    height: 10em;
+    display: flex;
+    
+    justify-content: center;
+}
+
+main {
+    margin: 0;
+}
+
+#input {
+    margin: 0;
+    justify-content: center;
+    /*background-color: #DDEE00;*/
+}
+
+.messages {
+    /*background: #DEFFFF;*/
+    /*border: solid;*/
+    
+}
+
+.message {
+   
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
+.message > #urtext {
+    background: #DDCCFF;
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+/*   width: 70%;*/
+}
+.message > #retext {
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+/*   width: 70%;*/
+}
+
+
+#alert {
+    font-size: 0.8em;
+    display: inline-block;
+    color: red;
+}
+
+footer {
+    /*Background-color: #ddeeff;*/
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+table tr:nth-child(odd){
+    background: lightblue;
+    
+}
+
